@@ -9,3 +9,4 @@ msgpack-python (Apache, 0.4.6) https://github.com/msgpack/msgpack-python/raw/mas
 pyzmq (BSD, 14.5.0) https://github.com/zeromq/pyzmq/raw/master/COPYING.BSD
 requests (Apache, 2.6.2) https://github.com/kennethreitz/requests/raw/master/LICENSE
 Werkzeug (BSD, 0.10.4) https://github.com/mitsuhiko/werkzeug/raw/master/LICENSE
+pyjwt (MIT, 0.7.2) https://github.com/jpadilla/pyjwt/raw/master/LICENSE
