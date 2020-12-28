@@ -2,3 +2,4 @@ locust==1.4.1
 pyjwt==1.7.1
 cryptography
 csv2md
+requests

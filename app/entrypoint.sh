@@ -10,15 +10,20 @@ LOCUST+=( --host=$TARGET_HOST )
 LOCUST_MODE=${LOCUST_MODE:-standalone}
 
 if [[ "$LOCUST_MODE" = "master" ]]; then
+    if [[ -z "${SLACK_HOOK}" ]]; then
+        echo "Missing SLACK_HOOK env. It's required to send the results."
+        exit 1
+    fi
     TIME=${LOCUST_TIME:-'1m'}
     USERS=${LOCUST_USERS:-100}
     SPAWN=${LOCUST_SPAWN:-2}
     WORKERS=${LOCUST_WORKERS:-2}
     LOCUST+=( --master --expect-workers $WORKERS --headless --csv=report -u $USERS -r $SPAWN -t $TIME)
-   
+    REPORTER=( "python /reporter.py" )
     echo "${LOCUST[@]}"
-    exec ${LOCUST[@]}
-    exec "sh /reporter.sh"
+    ${LOCUST[@]}
+    echo "Running reporter.sh"
+    exec ${REPORTER[@]}
 
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
     LOCUST+=( --worker --master-host=$LOCUST_MASTER)
