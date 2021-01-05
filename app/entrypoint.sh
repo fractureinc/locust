@@ -1,39 +1,26 @@
 #!/bin/bash
-
-#bail on fail
-set -eo pipefail
-
+# dont set -e. we want to report failed tests from locust process.
 LOCUST=( "/usr/local/bin/locust" )
-
 LOCUST+=( -f ${LOCUST_SCRIPT:-/locust-tasks/locust-tasks.py} )
 LOCUST+=( --host=$TARGET_HOST )
-LOCUST_MODE=${LOCUST_MODE:-standalone}
+LOCUST_MODE=${LOCUST_MODE:-master}
 
 if [[ "$LOCUST_MODE" = "master" ]]; then
-    if [[ -z "${SLACK_HOOK}" ]]; then
-        echo "Missing SLACK_HOOK env. It's required to send the results."
-        exit 1
-    fi
-    TIME=${LOCUST_TIME:-'1m'}
-    USERS=${LOCUST_USERS:-100}
-    SPAWN=${LOCUST_SPAWN:-2}
-    WORKERS=${LOCUST_WORKERS:-2}
-    LOCUST+=( --master --expect-workers $WORKERS --headless --csv=report -u $USERS -r $SPAWN -t $TIME)
-    REPORTER=( "python /reporter.py" )
+    export TIME=${LOCUST_TIME:-'1m'}
+    export USERS=${LOCUST_USERS:-100}
+    export SPAWN=${LOCUST_SPAWN:-2}
+    export WORKERS=${LOCUST_WORKERS:-5}
+    USEREPORTER=${USE_REPORTER:-'yes'}
+    LOCUST+=( --master --expect-workers $WORKERS --headless --csv=report -u $USERS -r $SPAWN -t $TIME --stop-timeout 60 )
     echo "${LOCUST[@]}"
     ${LOCUST[@]}
-    echo "Running reporter.sh"
-    exec ${REPORTER[@]}
-
+    if [[ "$USEREPORTER" = "yes" ]]; then
+        echo "Sending report ..."
+        REPORTER=( "python /reporter.py" )
+        exec ${REPORTER[@]}
+    fi
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
     LOCUST+=( --worker --master-host=$LOCUST_MASTER)
-    # wait for master
-    #while ! wget --spider -qT5 $LOCUST_MASTER:$LOCUST_MASTER_WEB >/dev/null 2>&1; do
-    #    echo "Waiting for master"
-    sleep 10
-    #done
     echo "${LOCUST[@]}"
     exec ${LOCUST[@]}
 fi
-
-#replace bash, let locust handle signals
