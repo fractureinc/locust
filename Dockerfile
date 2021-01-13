@@ -11,7 +11,7 @@ RUN apk --no-cache add --virtual=.build-dep \
 # COPY licenses, sample tasks and entrypoint into root
 COPY app /
 # Set script to be executable
-RUN chmod 755 /entrypoint.sh /reporter.sh 
+RUN chmod 755 /entrypoint.sh
 # Expose the required Locust ports
 EXPOSE 5557 5558
 # Start Locust using LOCUS_OPTS environment variable
