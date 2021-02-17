@@ -6,6 +6,7 @@ LOCUST+=( --host=$TARGET_HOST )
 LOCUST_MODE=${LOCUST_MODE:-master}
 
 if [[ "$LOCUST_MODE" = "master" ]]; then
+    cd /tmp
     export TIME=${LOCUST_TIME:-'1m'}
     export USERS=${LOCUST_USERS:-100}
     export SPAWN=${LOCUST_SPAWN:-2}
@@ -16,7 +17,7 @@ if [[ "$LOCUST_MODE" = "master" ]]; then
     ${LOCUST[@]}
     if [[ "$USEREPORTER" = "yes" ]]; then
         echo "Sending report ..."
-        REPORTER=( "python /reporter.py" )
+        REPORTER=( "python /usr/src/app/reporter.py" )
         exec ${REPORTER[@]}
     fi
 elif [[ "$LOCUST_MODE" = "worker" ]]; then

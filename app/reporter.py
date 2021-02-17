@@ -23,10 +23,10 @@ class LocustReporter(SlackApp):
     self.release_name = os.getenv('RELEASE_NAME')
     self.s3_bucket = os.getenv('LOCUST_REPORTS_BUCKET').strip()
     self.locust_script = '/locust-tasks/locust-tasks.py'
-    self.stats_csv = '/report_stats.csv'
-    self.failures_csv = '/report_failures.csv'
-    self.history_csv = '/report_stats_history.csv'
-    self.zip_file = '/reports.zip'
+    self.stats_csv = '/tmp/report_stats.csv'
+    self.failures_csv = '/tmp/report_failures.csv'
+    self.history_csv = '/tmp/report_stats_history.csv'
+    self.zip_file = '/tmp/reports.zip'
     self.s3_key = "%s/%s.zip" % (re.sub('^http(s)?:\/\/','',self.target_host).replace('/','-'), int(time.time()))
     self.slack_files = []
 
