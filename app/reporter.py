@@ -5,18 +5,11 @@ import boto3
 class SlackApp():
 
   def __init__(self):
-    self.slack_upload_url = 'https://slack.com/api/files.upload'
-    self.slack_hook = os.getenv('SLACK_HOOK')
-    #self.slack_token = os.getenv('SLACK_TOKEN')
+    self.__slack_hook = os.getenv('SLACK_HOOK')
 
   def send_message(self,json):
-    response = requests.post(self.slack_hook,data=json,headers={'Content-Type':'application/json'})
+    response = requests.post(self.__slack_hook,data=json,headers={'Content-Type':'application/json'})
     return response.text
-
-  #def upload_file(self,filedata,data={}):
-  #  auth = 'Bearer %s' % self.slack_token
-  #  response = requests.post(self.slack_upload_url,files={'file': filedata},headers={'Authorization': auth})
-  #  return response.json()
 
 class LocustReporter(SlackApp):
 

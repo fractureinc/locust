@@ -3,3 +3,4 @@ pyjwt==1.7.1
 cryptography
 requests
 boto3
+bs4
