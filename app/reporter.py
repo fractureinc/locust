@@ -59,7 +59,7 @@ class LocustReporter(SlackApp):
     text += "\n*URLs Tested:* %s" % self.csv_cnt(self.stats_csv)
     text += "\n*Total Requests:* %s" % totalr
     text += "\n*Total Failures:* %s" % totalf 
-    icon = ':x:' if int(totalf) > 0 or totalr == 0 else ':white_check_mark:'
+    icon = ':x:' if int(totalf) > 0 or int(totalr) == 0 else ':white_check_mark:'
     return text, icon
 
   def specs_mrkdwn(self):
