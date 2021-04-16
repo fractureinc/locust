@@ -54,12 +54,18 @@ class LocustReporter(SlackApp):
 
   def results_mrkdwn(self):
     totalr, totalf = self.req_totals()
-    text = "*Test results for:* %s" % self.target_host
-    text += "\n\n*Total Tasks:* %s" % self.task_count()
-    text += "\n*URLs Tested:* %s" % self.csv_cnt(self.stats_csv)
-    text += "\n*Total Requests:* %s" % totalr
-    text += "\n*Total Failures:* %s" % totalf 
-    icon = ':x:' if int(totalf) > 0 or int(totalr) == 0 else ':white_check_mark:'
+
+    if int(totalr) == 0: 
+      icon = ':x:'
+      text = "* No requests were completed. This is likely due to a network issue or misconfiguration of the locust deployment. *"
+    else: 
+      text = "*Test results for:* %s" % self.target_host
+      text += "\n\n*Total Tasks:* %s" % self.task_count()
+      text += "\n*URLs Tested:* %s" % self.csv_cnt(self.stats_csv)
+      text += "\n*Total Requests:* %s" % totalr
+      text += "\n*Total Failures:* %s" % totalf 
+      icon =  ':x:' if int(totalf) > 0 else ':white_check_mark:'
+
     return text, icon
 
   def specs_mrkdwn(self):
@@ -81,53 +87,88 @@ class LocustReporter(SlackApp):
 
   def summary_message(self): 
     results,results_icon = self.results_mrkdwn()
-    message={
-      'text': '%s New Load test results available for (%s)' % (results_icon, self.target_host),
-      'blocks':[
-        {
-          "type": "header",
-          "text": {
-            "type": "plain_text",
-            "text": "%s Test Summary" % results_icon
+    totalr, totalf = self.req_totals()
+
+    if int(totalr) == 0:
+      message = {
+        'text': '%s New Load test results available for (%s)' % (results_icon, self.target_host),
+        'blocks':[
+          {
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": "%s Test Summary" % results_icon
+            }
+          },{
+            'type':'section',
+            'text':{
+              'type':'mrkdwn',
+              'text': results
+            }
+          },{
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": "Test Config"
+            }
+          },{
+            'type':'section',
+            'text':{
+              'type':'mrkdwn',
+              'text': self.specs_mrkdwn()
+            }
+          }        
+        ]
+      }
+    
+    else: 
+      message={
+        'text': '%s New Load test results available for (%s)' % (results_icon, self.target_host),
+        'blocks':[
+          {
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": "%s Test Summary" % results_icon
+            }
+          },{
+            'type':'section',
+            'text':{
+              'type':'mrkdwn',
+              'text': results
+            }
+          },{
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": "Test Config"
+            }
+          },{
+            'type':'section',
+            'text':{
+              'type':'mrkdwn',
+              'text': self.specs_mrkdwn()
+            }
+          },
+          {
+            'type':'header',
+            'text': {
+              'type': 'plain_text',
+              'text': 'Request History Totals'
+            }
+          },
+          {
+            'type':'section',
+            'text':{
+              'type': 'mrkdwn',
+              'text': self.csv_text()
+            }
+          },
+          {
+            "type": "divider"
           }
-        },{
-          'type':'section',
-          'text':{
-            'type':'mrkdwn',
-            'text': results
-          }
-        },{
-          "type": "header",
-          "text": {
-            "type": "plain_text",
-            "text": "Test Config"
-          }
-        },{
-          'type':'section',
-          'text':{
-            'type':'mrkdwn',
-            'text': self.specs_mrkdwn()
-          }
-        },
-        {
-          'type':'header',
-          'text': {
-            'type': 'plain_text',
-            'text': 'Request History Totals'
-          }
-        },
-        {
-          'type':'section',
-          'text':{
-            'type': 'mrkdwn',
-            'text': self.csv_text()
-          }
-        },
-        {
-          "type": "divider"
-        }
-      ]
-    }
+        ]
+      }
     return json.dumps(message)
 
   def upload_to_s3(self):
