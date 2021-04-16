@@ -54,21 +54,21 @@ class LocustReporter(SlackApp):
 
   def results_mrkdwn(self):
     totalr, totalf = self.req_totals()
-    out = "*Test results for:* %s" % self.target_host
-    out += "\n\n*Total Tasks:* %s" % self.task_count()
-    out += "\n*URLs Tested:* %s" % self.csv_cnt(self.stats_csv)
-    out += "\n*Total Requests:* %s" % totalr
-    out += "\n*Total Failures:* %s" % totalf 
-    icon = ':x:' if int(totalf) > 0 else ':white_check_mark:'
-    return out, icon
+    text = "*Test results for:* %s" % self.target_host
+    text += "\n\n*Total Tasks:* %s" % self.task_count()
+    text += "\n*URLs Tested:* %s" % self.csv_cnt(self.stats_csv)
+    text += "\n*Total Requests:* %s" % totalr
+    text += "\n*Total Failures:* %s" % totalf 
+    icon = ':x:' if int(totalf) > 0 or totalr == 0 else ':white_check_mark:'
+    return text, icon
 
   def specs_mrkdwn(self):
-    out = "" 
-    out += "\n*Users:* %s" % self.users
-    out += "\n*Test Length:* %s" % self.time
-    out += "\n*User Spawn Rate:* %s" % self.spawn
-    out += "\n*Worker Nodes:* %s" % self.workers
-    return out
+    text = "" 
+    text += "\n*Users:* %s" % self.users
+    text += "\n*Users Spawned/s:* %s" % self.spawn
+    text += "\n*Test Length:* %s" % self.time
+    text += "\n*Worker Nodes:* %s" % self.workers
+    return text
 
   def csv_text(self):
     mrkdwn=''
@@ -78,16 +78,6 @@ class LocustReporter(SlackApp):
     mrkdwn+="\n\n The complete CSV data was uploaded to the S3 path\n`s3://%s/%s`\n\n" % (self.s3_bucket, self.s3_key)
     mrkdwn+="\n\n Check out the Locust docs for more info about testing and results. https://docs.locust.io/en/stable/what-is-locust.html"
     return mrkdwn 
-
-  def upload_to_s3(self):
-    zipf = zipfile.ZipFile(self.zip_file, 'w', zipfile.ZIP_DEFLATED)
-    zipf.write(self.stats_csv)  
-    zipf.write(self.failures_csv)  
-    zipf.write(self.history_csv) 
-    zipf.close()
-    s3 = boto3.resource('s3')
-    data = open(self.zip_file, 'rb')
-    s3.Bucket(self.s3_bucket).put_object(Key=self.s3_key, Body=data)
 
   def summary_message(self): 
     results,results_icon = self.results_mrkdwn()
@@ -139,7 +129,17 @@ class LocustReporter(SlackApp):
       ]
     }
     return json.dumps(message)
-  
+
+  def upload_to_s3(self):
+    zipf = zipfile.ZipFile(self.zip_file, 'w', zipfile.ZIP_DEFLATED)
+    zipf.write(self.stats_csv)  
+    zipf.write(self.failures_csv)  
+    zipf.write(self.history_csv) 
+    zipf.close()
+    s3 = boto3.resource('s3')
+    data = open(self.zip_file, 'rb')
+    s3.Bucket(self.s3_bucket).put_object(Key=self.s3_key, Body=data)
+
   def send_report(self):
     print('Uploading files ...')
     self.upload_to_s3()

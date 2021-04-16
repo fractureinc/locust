@@ -21,7 +21,7 @@ if [[ "$LOCUST_MODE" = "master" ]]; then
         exec ${REPORTER[@]}
     fi
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
-    LOCUST+=( --worker --master-host=$LOCUST_MASTER)
+    LOCUST+=( --worker --master-host=$LOCUST_MASTER )
     echo "${LOCUST[@]}"
     exec ${LOCUST[@]}
 fi
