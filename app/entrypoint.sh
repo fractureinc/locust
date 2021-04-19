@@ -3,9 +3,9 @@
 LOCUST=( "/usr/local/bin/locust" )
 LOCUST+=( -f ${LOCUST_SCRIPT:-/locust-tasks/locust-tasks.py} )
 LOCUST+=( --host=$TARGET_HOST )
-LOCUST_MODE=${LOCUST_MODE:-master}
+LOCUST_MODE=${LOCUST_MODE:-manager}
 
-if [[ "$LOCUST_MODE" = "master" ]]; then
+if [[ "$LOCUST_MODE" = "manager" ]]; then
     cd /tmp
     export TIME=${LOCUST_TIME:-'1m'}
     export USERS=${LOCUST_USERS:-100}
@@ -21,7 +21,7 @@ if [[ "$LOCUST_MODE" = "master" ]]; then
         exec ${REPORTER[@]}
     fi
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
-    LOCUST+=( --worker --master-host=$LOCUST_MASTER )
+    LOCUST+=( --worker --master-host=$LOCUST_MANAGER )
     echo "${LOCUST[@]}"
     exec ${LOCUST[@]}
 fi

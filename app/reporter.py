@@ -57,7 +57,7 @@ class LocustReporter(SlackApp):
 
     if int(totalr) == 0: 
       icon = ':x:'
-      text = "* No requests were completed. This is likely due to a network issue or misconfiguration of the locust deployment. *"
+      text = "No requests were completed. This is likely due to a network issue or misconfiguration of the locust deployment."
     else: 
       text = "*Test results for:* %s" % self.target_host
       text += "\n\n*Total Tasks:* %s" % self.task_count()
